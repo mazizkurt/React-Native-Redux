@@ -1,32 +1,156 @@
-import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
-const HomeScreen = () => {
-    const dispatch = useDispatch()
-    const items = useSelector((state)=>state.noteReducer.notes.items)
-    const ekle = () => {
-        dispatch({
-            type:"ADD_NOTE",
-            payload:{
-                note:'Naber',
-                id:"Deneme"
-            }
-        })
-    }
+import React, { Component } from "react";
+import { Alert, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+// @ts-expect-error
+import { Agenda, LocaleConfig } from "react-native-calendars";
+import Moment from "moment/min/moment-with-locales";
+
+const testIDs = require("../testIDs");
+LocaleConfig.locales["tr"] = {
+  monthNames: [
+    "Ocak",
+    "Şubat",
+    "Mart",
+    "Nisan",
+    "Mayıs",
+    "Haziran",
+    "Temmuz",
+    "Ağustos",
+    "Eylül",
+    "Ekim",
+    "Kasım",
+    "Aralık",
+  ],
+  monthNamesShort: [
+    "Oc.",
+    "Şub.",
+    "Mart",
+    "Nis.",
+    "May.",
+    "Haz.",
+    "Tem.",
+    "Ağu.",
+    "Eyl.",
+    "Ekim",
+    "Kasım",
+    "Ara.",
+  ],
+  dayNames: [
+    "Pazar",
+    "Pazartesi",
+    "Salı",
+    "Çarşamba",
+    "Perşembe",
+    "Cuma",
+    "Cumartesi",
+  ],
+  dayNamesShort: ["Pa.", "Pzt.", "Salı", "Çar.", "Per.", "Cu.", "Cum."],
+  today: "Bugün",
+};
+LocaleConfig.defaultLocale = "tr";
+
+export default class HomeScreen extends Component {
+  state = {
+    items: {},
+  };
+
+  render() {
     return (
-        <View>
-            <TouchableOpacity onPress={()=>ekle()}><Text>Ekle</Text></TouchableOpacity>
-            {
-                items.map((data,index)=>{
-                    return (
-                        <Text>{data.note}</Text>
-                    )
-                })
-            }
-        </View>
-    )
+      <Agenda
+        testID={testIDs.agenda.CONTAINER}
+        items={this.state.items}
+        loadItemsForMonth={this.loadItems.bind(this)}
+        selected={Moment().format("YYYY-MM-DD")}
+        renderItem={this.renderItem.bind(this)}
+        renderEmptyDate={this.renderEmptyDate.bind(this)}
+        rowHasChanged={this.rowHasChanged.bind(this)}
+        showClosingKnob={true}
+        // markingType={'period'}
+        // markedDates={{
+        //    '2017-05-08': {textColor: '#43515c'},
+        //    '2017-05-09': {textColor: '#43515c'},
+        //    '2017-05-14': {startingDay: true, endingDay: true, color: 'blue'},
+        //    '2017-05-21': {startingDay: true, color: 'blue'},
+        //    '2017-05-22': {endingDay: true, color: 'gray'},
+        //    '2017-05-24': {startingDay: true, color: 'gray'},
+        //    '2017-05-25': {color: 'gray'},
+        //    '2017-05-26': {endingDay: true, color: 'gray'}}}
+        // monthFormat={'yyyy'}
+        // theme={{calendarBackground: 'red', agendaKnobColor: 'green'}}
+        // renderDay={(day, item) => (<Text>{day ? day.day: 'item'}</Text>)}
+        // hideExtraDays={false}
+      />
+    );
+  }
+
+  loadItems(day) {
+    setTimeout(() => {
+      for (let i = -15; i < 85; i++) {
+        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+        const strTime = this.timeToString(time);
+        console.log(strTime)
+        if (!this.state.items[strTime]) {
+          this.state.items[strTime] = [];
+          const numItems = Math.floor(Math.random() * 3 + 1);
+          for (let j = 0; j < numItems; j++) {
+            this.state.items[strTime].push({
+              name: "Item for " + strTime + " #" + j,
+              height: 100,
+            });
+          }
+        }
+      }
+      const newItems = {};
+      Object.keys(this.state.items).forEach((key) => {
+        newItems[key] = this.state.items[key];
+      });
+      this.setState({
+        items: newItems,
+      });
+    }, 1000);
+  }
+
+  renderItem(item) {
+    return (
+      <TouchableOpacity
+        testID={testIDs.agenda.ITEM}
+        style={[styles.item, { height: item.height }]}
+        onPress={() => Alert.alert(item.name)}
+      >
+        <Text>{item.name}</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  renderEmptyDate() {
+    return (
+      <View style={styles.emptyDate}>
+        <Text>This is empty date!</Text>
+      </View>
+    );
+  }
+
+  rowHasChanged(r1, r2) {
+    return r1.name !== r2.name;
+  }
+
+  timeToString(time) {
+    const date = new Date(time);
+    return date.toISOString().split("T")[0];
+  }
 }
 
-export default HomeScreen
-
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  item: {
+    backgroundColor: "white",
+    flex: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
+    marginTop: 17,
+  },
+  emptyDate: {
+    height: 15,
+    flex: 1,
+    paddingTop: 30,
+  },
+});

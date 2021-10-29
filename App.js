@@ -7,6 +7,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider as ReduxProvider } from 'react-redux';
 import configureStore from './redux/store';
 import HomeScreen from './screens/HomeScreen';
+import ReduxScreen from './screens/Redux';
+import ListScreen from './screens/ListScreen';
 
 const store = configureStore()
 
@@ -18,7 +20,8 @@ function App() {
     <ReduxProvider store={store}>
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Redux" component={ReduxScreen} options={{headerTitle:'Notlarım'}}/>
+          <Stack.Screen name="List" component={ListScreen} options={{headerTitle:'Listelerim'}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </ReduxProvider>
