@@ -12,14 +12,6 @@ let noteReducer = (state = defaultState, action) => {
         id: action.payload.id,
       };
       return newState;
-
-    case "LOCATION_FILTER_ADS":
-         newState = { ...state };
-        newState.notes={
-          items: [...newState.notes.items, action.payload],
-          id: action.payload.id,
-        }
-        return newState
     default:
       return state;
   }
